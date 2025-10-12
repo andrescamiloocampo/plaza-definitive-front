@@ -1,0 +1,1 @@
+export { AlertLabel } from "./AlertLabel/AlertLabel";
