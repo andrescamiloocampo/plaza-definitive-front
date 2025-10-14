@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useOrderStore } from "@/app/store/OrderStore";
-import { useCreateOrder } from "@/app/hooks/useOrders";
+import { useCreateOrder } from "@/app/helpers/hooks/useOrders";
 
 export const Cart = () => {
   const router = useRouter();

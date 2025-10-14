@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { getDishesByRestaurantId } from "@/app/datasources";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useOrderStore } from "@/app/store/OrderStore";
 import { CartButton, ConflictModal } from "@/app/components/molecules";
-import { useSearchParams } from "next/navigation";
 import { AlertLabel } from "@/app/components/atoms";
 
 interface DishCategory {
@@ -50,16 +49,12 @@ export default function RestaurantMenu({
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [showConflictModal, setShowConflictModal] = useState(false);
   const [pendingDish, setPendingDish] = useState<DishModel | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const page = 0;
   const size = 20;
 
-  const {
-    restaurant,
-    addItem,
-    clearOrder,
-    canAddFromRestaurant,
-  } = useOrderStore();
+  const { restaurant, addItem, clearOrder, canAddFromRestaurant } = useOrderStore();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["dishes", id, page],
@@ -68,27 +63,23 @@ export default function RestaurantMenu({
   });
 
   const dishes: DishModel[] = data || [];
-  const categories = [
-    "Todos",
-    ...new Set(dishes.map((dish) => dish.category.name)),
-  ];
+  const categories = ["Todos", ...new Set(dishes.map((dish) => dish.category.name))];
 
   const filteredDishes =
     selectedCategory === "Todos"
       ? dishes
       : dishes.filter((dish) => dish.category.name === selectedCategory);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("es-CO", {
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
       minimumFractionDigits: 0,
     }).format(price);
-  };
 
   const handleAddToCart = (dish: DishModel) => {
     const restaurantInfo = {
-      id: id,
+      id,
       name: restaurantName,
       address: restaurantAddress,
       phone: restaurantPhone,
@@ -100,11 +91,7 @@ export default function RestaurantMenu({
       return;
     }
 
-    const success = addItem(dish, restaurantInfo);
-
-    if (success) {
-      console.log("Plato agregado:", dish.name);
-    }
+    addItem(dish, restaurantInfo);
   };
 
   const handleClearAndAdd = () => {
@@ -112,7 +99,7 @@ export default function RestaurantMenu({
       clearOrder();
 
       const restaurantInfo = {
-        id: id,
+        id,
         name: restaurantName,
         address: restaurantAddress,
         phone: restaurantPhone,
@@ -133,11 +120,25 @@ export default function RestaurantMenu({
     router.push("/dashboard");
   };
 
+  // Detecta el scroll para aplicar el efecto glass
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-50 py-20">             
-      <div className="bg-white shadow-sm sticky top-0 z-10">        
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
+    <div className="min-h-screen bg-gray-50 pb-20">      
+      <div
+        className={`sticky top-[80px] z-20 backdrop-blur-md bg-white/70 transition-all duration-300 ${
+          isScrolled ? "shadow-md bg-white/80" : "shadow-sm bg-white/60"
+        }`}
+      >
+        {/* Header principal */}
+        <div className="max-w-6xl mx-auto px-4 py-4 border-b border-white/30">
+          <div className="flex items-center justify-between mb-3">
             <button
               onClick={goBack}
               className="flex items-center text-gray-600 hover:text-gray-900 transition cursor-pointer"
@@ -146,34 +147,30 @@ export default function RestaurantMenu({
               <span>Volver</span>
             </button>
 
-            <CartButton/>
+            <CartButton />
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {restaurantName}
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-900">{restaurantName}</h1>
             <p className="text-gray-600 text-sm mt-1">{restaurantAddress}</p>
-
             <AlertLabel
               show={!!restaurant && restaurant.id !== id}
               restaurantName={restaurant?.name}
             />
           </div>
         </div>
-      </div>
 
-      {!isLoading && !error && dishes.length > 0 && (
-        <div className="bg-white border-b sticky top-[140px] z-10">
+        {/* Categorías */}
+        {!isLoading && !error && dishes.length > 0 && (
           <div className="max-w-6xl mx-auto px-4 py-3">
-            <div className="flex gap-2 overflow-x-auto no-scrollbar">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                   className={`px-4 py-2 rounded-full whitespace-nowrap transition ${
                     selectedCategory === category
-                      ? "bg-purple-600 text-white"
+                      ? "bg-purple-600 text-white shadow-sm"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -182,9 +179,9 @@ export default function RestaurantMenu({
               ))}
             </div>
           </div>
-        </div>
-      )}
-
+        )}
+      </div>
+      
       <div className="max-w-6xl mx-auto px-4 py-6">
         {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -211,9 +208,7 @@ export default function RestaurantMenu({
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start">
             <AlertCircle className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-red-800 font-medium">
-                Error al cargar el menú
-              </p>
+              <p className="text-red-800 font-medium">Error al cargar el menú</p>
               <p className="text-red-600 text-sm mt-1">
                 No se pudo cargar el menú. Por favor intenta nuevamente.
               </p>
@@ -248,15 +243,12 @@ export default function RestaurantMenu({
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 No hay platos en esta categoría
               </h3>
-              <p className="text-gray-600">
-                Intenta seleccionar otra categoría.
-              </p>
+              <p className="text-gray-600">Intenta seleccionar otra categoría.</p>
             </div>
           )}
-
-        {/* Dishes Grid */}
+        
         {!isLoading && !error && filteredDishes.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-20">
             {filteredDishes.map((dish) => (
               <div
                 key={dish.id}
@@ -272,7 +264,7 @@ export default function RestaurantMenu({
                         "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
                     }}
                   />
-                  <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-xs font-medium">
+                  <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium">
                     {dish.category.name}
                   </div>
                 </div>

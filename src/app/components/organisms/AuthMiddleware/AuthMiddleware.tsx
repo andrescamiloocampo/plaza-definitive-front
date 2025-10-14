@@ -14,7 +14,7 @@ export default function AuthMiddleware({children}:Props) {
         console.log('Call')
         const token = sessionStorage.getItem('accessToken');
         if(!token){
-            router.push('/login')
+            router.push('/auth/login')
         }    
     },[router]);
     

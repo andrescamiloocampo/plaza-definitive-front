@@ -1,6 +1,6 @@
-import { OrderRequestDto } from './../store/OrderStore';
+import { OrderRequestDto } from '../../store/OrderStore';
 import { useMutation, useQuery, useQueryClient, UseMutationResult } from "@tanstack/react-query";
-import { orderService } from '../datasources/orders/orderService';
+import { orderService } from '../../datasources/orders/orderService';
 
 export function useCreateOrder(token: string): UseMutationResult<any, Error, OrderRequestDto> {
   const queryClient = useQueryClient();

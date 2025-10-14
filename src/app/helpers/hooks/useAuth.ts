@@ -1,5 +1,5 @@
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
-import { authService, RegisterUserDto, LoginUserDto, LoginResponse } from "../datasources";
+import { authService, RegisterUserDto, LoginUserDto, LoginResponse } from "../../datasources";
 
 export function useRegister(): UseMutationResult<void, Error, RegisterUserDto> {
   return useMutation({

@@ -21,7 +21,7 @@ export default function HomePage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["restaurants", page, token],
     queryFn: async () => await getPaginatedRestaurants(page, size, token),
-    enabled: !!token, // Solo ejecuta la query si hay token
+    enabled: !!token,
   });
 
   return (

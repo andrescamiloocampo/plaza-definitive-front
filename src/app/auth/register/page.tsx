@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { User, Mail, Lock, Phone, Hash, Calendar, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react";
-import { RegisterUserDto } from "../datasources/users/auth/authService";
-import { useRegister } from "../hooks/useAuth";
+import { RegisterUserDto } from "@/app/datasources";
+import { useRegister } from "@/app/helpers/hooks/useAuth";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -75,8 +75,7 @@ export default function RegisterPage() {
       setValidationError("Documento de identidad inválido");
       return false;
     }
-
-    // Validar edad mínima (18 años)
+    
     const birthDate = new Date(formData.birthdate);
     const today = new Date();
     const age = today.getFullYear() - birthDate.getFullYear();
@@ -97,8 +96,7 @@ export default function RegisterPage() {
     if (!validateForm()) {
       return;
     }
-
-    // Preparar el DTO según la interfaz del backend
+    
     const registerData: RegisterUserDto = {
       name: formData.name,
       lastname: formData.lastname,
@@ -108,19 +106,16 @@ export default function RegisterPage() {
       email: formData.email,
       password: formData.password
     };
-
-    // Ejecutar la mutación
+    
     register(registerData);
   };
 
-  // Obtener el mensaje de error apropiado
   const displayError = validationError || (isError ? error?.message : "");
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
       <div className="w-full max-w-2xl">
-        <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-gray-100">
-          {/* Header */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-gray-100">          
           <div className="text-center space-y-2">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 mb-4">
               <User className="w-8 h-8 text-white" />
@@ -128,8 +123,7 @@ export default function RegisterPage() {
             <h1 className="text-3xl font-bold text-gray-900">Crear Cuenta</h1>
             <p className="text-gray-500">Completa el formulario para registrarte</p>
           </div>
-
-          {/* Success Message */}
+          
           {isSuccess && (
             <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg">
               <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
@@ -139,18 +133,15 @@ export default function RegisterPage() {
               </div>
             </div>
           )}
-
-          {/* Error Message */}
+          
           {displayError && (
             <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
               <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
               <p className="text-sm text-red-600">{displayError}</p>
             </div>
           )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Nombres y Apellidos */}
+          
+          <form onSubmit={handleSubmit} className="space-y-5">            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -196,8 +187,7 @@ export default function RegisterPage() {
                 </div>
               </div>
             </div>
-
-            {/* Documento y Teléfono */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="identityDocument" className="block text-sm font-medium text-gray-700">
@@ -243,8 +233,7 @@ export default function RegisterPage() {
                 </div>
               </div>
             </div>
-
-            {/* Fecha de Nacimiento y Email */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700">
@@ -290,8 +279,7 @@ export default function RegisterPage() {
                 </div>
               </div>
             </div>
-
-            {/* Contraseñas */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -361,8 +349,7 @@ export default function RegisterPage() {
                 </div>
               </div>
             </div>
-
-            {/* Submit Button */}
+            
             <button
               type="submit"
               disabled={isPending}
@@ -393,12 +380,11 @@ export default function RegisterPage() {
               )}
             </button>
           </form>
-
-          {/* Footer */}
+          
           <div className="text-center pt-4 border-t border-gray-100">
             <p className="text-sm text-gray-600">
               ¿Ya tienes una cuenta?{" "}
-              <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
+              <a href="login" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
                 Inicia sesión aquí
               </a>
             </p>

@@ -89,8 +89,7 @@ export const OrderHistory = () => {
     try {
       await orderService.cancelOrder(token);
       toast.success("Orden cancelada exitosamente");
-      
-      // Actualizar el estado local de la orden
+            
       setOrders(prevOrders =>
         prevOrders.map(order =>
           order.orderId === orderToCancel
