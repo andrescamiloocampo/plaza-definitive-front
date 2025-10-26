@@ -2,157 +2,167 @@
 
 import { OrderCardModel } from "./OrderCard.model";
 import { OrderStateIcon, OrderStateBadge } from "../../atoms";
+import { OrderActionButton } from "../../atoms";
+import { PinModal } from "../../molecules";
 import { useState } from "react";
 
 export const OrderCard = ({ order, onAssign, onNotifyReady, onDeliver }: OrderCardModel) => {
-  const [showPinModal, setShowPinModal] = useState(false);
-  const [pin, setPin] = useState("");
+  const [showPinModal, setShowPinModal] = useState(false);  
 
   const handleDeliverClick = () => setShowPinModal(true);
 
-  const handleDeliverConfirm = () => {
-    if (pin.length === 4) {
-      onDeliver({ orderId: order.id, securityPin: pin });
-      setShowPinModal(false);
-      setPin("");
-    }
-  };
-
   const stateColors: Record<string, string> = {
-    PENDING: "text-yellow-600 border-yellow-400/40",
-    PREPARATION: "text-blue-600 border-blue-400/40",
-    DONE: "text-purple-600 border-purple-400/40",
-    DELIVERED: "text-green-600 border-green-400/40",
-    CANCELED: "text-red-600 border-red-400/40",
+    PENDING: "border-l-yellow-500 bg-yellow-50/50",
+    PREPARATION: "border-l-blue-500 bg-blue-50/50",
+    DONE: "border-l-purple-500 bg-purple-50/50",
+    DELIVERED: "border-l-green-500 bg-green-50/50",
+    CANCELED: "border-l-red-500 bg-red-50/50",
   };
 
   return (
     <>
       <div
-        className={`bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300 ${stateColors[order.state] || "border-gray-200"
-          }`}
-      >
-        {/* Encabezado */}
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="font-bold text-lg text-gray-800">
-            Orden #{order.id}
-          </h3>
+        className={`bg-white border-l-4 border-r border-t border-b border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 ${
+          stateColors[order.state] || "border-l-gray-300 bg-white"
+        }`}
+      >        
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="font-bold text-xl text-gray-900">
+              Orden #{order.id}
+            </h3>
+            <p className="text-xs text-gray-500 mt-1">
+              {new Date(order.date).toLocaleString("es-CO", {
+                dateStyle: "short",
+                timeStyle: "short"
+              })}
+            </p>
+          </div>
           <div className="flex items-center gap-2">
             <OrderStateIcon state={order.state} />
             <OrderStateBadge state={order.state} />
           </div>
         </div>
-
-        <p className="text-xs text-gray-500 mb-3">
-          Creada el {new Date(order.date).toLocaleString("es-CO")}
-        </p>
-
-        <hr className="border-gray-200 mb-3" />
-
-        {/* Información básica */}
-        <div className="text-sm space-y-1 mb-3">
-          <div className="flex justify-between text-gray-700">
-            <span>Cliente:</span>
-            <span className="font-medium">ID {order.userId}</span>
+        
+        <div className="bg-gray-50 rounded-lg p-4 space-y-2 mb-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 flex items-center gap-2">
+              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+              Cliente
+            </span>
+            <span className="font-semibold text-gray-900">ID {order.userId}</span>
           </div>
-          <div className="flex justify-between text-gray-700">
-            <span>Restaurante:</span>
-            <span className="font-medium">ID {order.restaurantId}</span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 flex items-center gap-2">
+              <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+              Restaurante
+            </span>
+            <span className="font-semibold text-gray-900">ID {order.restaurantId}</span>
           </div>
           {order.chefId && (
-            <div className="flex justify-between text-gray-700">
-              <span>Asignada a:</span>
-              <span className="font-medium">Chef #{order.chefId}</span>
+            <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200">
+              <span className="text-gray-600 flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                Asignada a
+              </span>
+              <span className="font-semibold text-gray-900">Chef #{order.chefId}</span>
             </div>
           )}
         </div>
-
-        {/* Lista de platos */}
+        
         {order.dishes && order.dishes.length > 0 && (
-          <div className="border-t border-gray-100 pt-3 mt-3">
-            <h4 className="font-semibold text-sm text-gray-700 mb-2">
-              Platos:
+          <div className="border-t border-gray-200 pt-4">
+            <h4 className="font-semibold text-sm text-gray-700 mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Platos ({order.dishes.length})
             </h4>
-            <div className="space-y-1 text-sm">
+            <div className="space-y-2">
               {order.dishes.map((dish, idx) => (
-                <div key={idx} className="flex justify-between">
-                  <span className="text-gray-600">{dish.name}</span>
-                  <span className="font-medium text-gray-800">x{dish.quantity}</span>
+                <div 
+                  key={idx} 
+                  className="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
+                >
+                  <span className="text-sm text-gray-700 font-medium">{dish.name}</span>
+                  <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-xs font-bold">
+                    ×{dish.quantity}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         )}
-
-        <div className="mt-4 flex gap-2">
+      
+        <div className="mt-5 flex gap-3">
           {order.state === "PENDING" && (
-            <button
+            <OrderActionButton
               onClick={() => onAssign(order.id)}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              variant="blue"
+              icon="🙋‍♂️"
             >
               Asignarme
-            </button>
+            </OrderActionButton>
           )}
 
           {order.state === "PREPARATION" && (
-            <button
+            <OrderActionButton
               onClick={() => onNotifyReady(order.id)}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              variant="green"
+              icon="✓"
             >
               Marcar lista
-            </button>
+            </OrderActionButton>
           )}
 
           {order.state === "DONE" && (
-            <button
+            <OrderActionButton
               onClick={handleDeliverClick}
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              variant="purple"
+              icon="📦"
             >
               Entregar
-            </button>
+            </OrderActionButton>
           )}
-        </div>
+        </div>      
       </div>
 
-      {/* Modal de PIN */}
-      {showPinModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
-            <h3 className="text-lg font-bold mb-4 text-gray-800">
-              Entregar Orden #{order.id}
-            </h3>
-            <p className="text-gray-600 mb-4 text-sm">
-              Ingresa el PIN de seguridad del cliente:
-            </p>
-            <input
-              type="text"
-              maxLength={4}
-              value={pin}
-              onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-2xl font-bold tracking-widest mb-4"
-              placeholder="0000"
-            />
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowPinModal(false);
-                  setPin("");
-                }}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDeliverConfirm}
-                disabled={pin.length !== 4}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PinModal
+        isOpen={showPinModal}
+        orderId={order.id}
+        onClose={() => setShowPinModal(false)}
+        onConfirm={(pin) => onDeliver({ orderId: order.id, securityPin: pin })}
+      />
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes scaleIn {
+          from {
+            transform: scale(0.95);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+        
+        .animate-scaleIn {
+          animation: scaleIn 0.3s ease-out;
+        }
+      `}</style>
     </>
   );
 };

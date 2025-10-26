@@ -1,3 +1,5 @@
+'use client'
+
 import { OrderRequestDto } from '../../store/OrderStore';
 import { useMutation, useQuery, useQueryClient, UseMutationResult } from "@tanstack/react-query";
 import { orderService } from '../../datasources/orders/orderService';

@@ -1,3 +1,5 @@
+'use client'
+
 import { employeeOrderService } from '@/app/datasources/orders/employeeOrderService';
 import { useQuery,useMutation,useQueryClient } from "@tanstack/react-query";
 import { GetOrdersParams,DeliverOrderParams } from "@/app/models";

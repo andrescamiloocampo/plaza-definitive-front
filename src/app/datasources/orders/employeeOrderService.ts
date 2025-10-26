@@ -55,6 +55,7 @@ class EmployeeOrderService {
   }
 
   async assignOrder(orderId: number): Promise<void> {
+    console.log('Assign',this.getAuthToken());
     const response = await fetch(`${this.baseUrl}/${orderId}`, {
       method: "PATCH",
       headers: this.getHeaders(),

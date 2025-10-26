@@ -6,10 +6,8 @@ export const getDishesByRestaurantId = async (
 ) => {
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
-  headers.append("Authorization", `Bearer ${token}`);
+  headers.append("Authorization", `Bearer ${token}`);  
 
-  console.log(`${process.env.NEXT_PUBLIC_PLAZA_HOST}/dishes?rid=${rid}&page=${page}&size=${size}`);
-  
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_PLAZA_HOST}/dishes?rid=${rid}&page=${page}&size=${size}`,

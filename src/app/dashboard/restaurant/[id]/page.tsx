@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { getDishesByRestaurantId } from "@/app/datasources";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { useOrderStore } from "@/app/store/OrderStore";
 import { CartButton, ConflictModal } from "@/app/components/molecules";
 import { AlertLabel } from "@/app/components/atoms";
@@ -26,25 +26,19 @@ interface DishModel {
 }
 
 interface RestaurantMenuProps {
-  params: Promise<{
-    id: number;
-  }>;
   restaurantName: string;
   restaurantAddress: string;
   restaurantPhone: string;
 }
 
-export default function RestaurantMenu({
-  restaurantAddress,
-  restaurantPhone,
-  params,
-}: RestaurantMenuProps) {
+export default function RestaurantMenu({ restaurantAddress, restaurantPhone }: RestaurantMenuProps) {
   const searchParams = useSearchParams();
   const restaurantName = searchParams.get("name") || "Restaurante sin nombre";
   const { data: session } = useSession();
   const token = session?.accessToken;
   const router = useRouter();
-  const { id } = React.use(params);
+  const { id } = useParams() as { id?: string };
+  const restaurantId = id ? Number(id) : undefined;
 
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [showConflictModal, setShowConflictModal] = useState(false);
@@ -57,9 +51,9 @@ export default function RestaurantMenu({
   const { restaurant, addItem, clearOrder, canAddFromRestaurant } = useOrderStore();
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["dishes", id, page],
-    queryFn: async () => await getDishesByRestaurantId(id, page, size, token),
-    enabled: !!token,
+    queryKey: ["dishes", restaurantId, page],
+    queryFn: async () => await getDishesByRestaurantId(restaurantId as number, page, size, token),
+    enabled: !!token && !!restaurantId,
   });
 
   const dishes: DishModel[] = data || [];
@@ -78,14 +72,15 @@ export default function RestaurantMenu({
     }).format(price);
 
   const handleAddToCart = (dish: DishModel) => {
+    if (restaurantId === undefined) return;
     const restaurantInfo = {
-      id,
+      id: restaurantId,
       name: restaurantName,
       address: restaurantAddress,
       phone: restaurantPhone,
     };
 
-    if (!canAddFromRestaurant(id)) {
+    if (!canAddFromRestaurant(restaurantId as number)) {
       setPendingDish(dish);
       setShowConflictModal(true);
       return;
@@ -95,20 +90,19 @@ export default function RestaurantMenu({
   };
 
   const handleClearAndAdd = () => {
-    if (pendingDish) {
-      clearOrder();
+    if (!pendingDish || restaurantId === undefined) return;
+    clearOrder();
 
-      const restaurantInfo = {
-        id,
-        name: restaurantName,
-        address: restaurantAddress,
-        phone: restaurantPhone,
-      };
+    const restaurantInfo = {
+      id: restaurantId,
+      name: restaurantName,
+      address: restaurantAddress,
+      phone: restaurantPhone,
+    };
 
-      addItem(pendingDish, restaurantInfo);
-      setShowConflictModal(false);
-      setPendingDish(null);
-    }
+    addItem(pendingDish, restaurantInfo);
+    setShowConflictModal(false);
+    setPendingDish(null);
   };
 
   const handleCancelConflict = () => {
@@ -120,7 +114,6 @@ export default function RestaurantMenu({
     router.push("/dashboard");
   };
 
-  // Detecta el scroll para aplicar el efecto glass
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -135,8 +128,7 @@ export default function RestaurantMenu({
         className={`sticky top-[80px] z-20 backdrop-blur-md bg-white/70 transition-all duration-300 ${
           isScrolled ? "shadow-md bg-white/80" : "shadow-sm bg-white/60"
         }`}
-      >
-        {/* Header principal */}
+      >    
         <div className="max-w-6xl mx-auto px-4 py-4 border-b border-white/30">
           <div className="flex items-center justify-between mb-3">
             <button
@@ -154,13 +146,12 @@ export default function RestaurantMenu({
             <h1 className="text-2xl font-bold text-gray-900">{restaurantName}</h1>
             <p className="text-gray-600 text-sm mt-1">{restaurantAddress}</p>
             <AlertLabel
-              show={!!restaurant && restaurant.id !== id}
+              show={!!restaurant && restaurant.id !== restaurantId}
               restaurantName={restaurant?.name}
             />
           </div>
         </div>
-
-        {/* Categorías */}
+        
         {!isLoading && !error && dishes.length > 0 && (
           <div className="max-w-6xl mx-auto px-4 py-3">
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">

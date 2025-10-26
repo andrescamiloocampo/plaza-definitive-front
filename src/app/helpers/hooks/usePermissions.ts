@@ -1,3 +1,5 @@
+'use client'
+
 import { useUser } from '@/app/components/context/UserContext';
 import { Role } from '@/app/models/Role.model';
 import { hasPermission as checkPathPermission } from '@/app/helpers/config/permissions.config';

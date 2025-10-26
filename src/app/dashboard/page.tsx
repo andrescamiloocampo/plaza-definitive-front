@@ -25,35 +25,55 @@ export default function HomePage() {
   });
 
   return (
-    <div className="py-20">
+    <div className="py-16 md:py-20">
       <Welcome title={wc.title} description={wc.description} />
-      <div className="px-4 md:px-12 lg:px-24 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 gap-y-8 min-w-0 justify-center items-center">
-        {isLoading && (
-          <>
-            <RestaurantCardSkeleton />
-            <RestaurantCardSkeleton />
-            <RestaurantCardSkeleton />
-            <RestaurantCardSkeleton />
-          </>
-        )}
-        {error && (
-          <div className="col-span-4 text-center py-8 text-red-500">
-            Error al cargar restaurantes
-          </div>
-        )}
-        {data &&
-          data.map((rest: RestaurantModel) => (
-            <RestaurantCard key={rest.id} {...rest} />
-          ))}
-      </div>
-      <Pagination
-        page={page}
-        hasNext={!!data && data.length === size}
-        onPrev={() => setPage((prev) => Math.max(prev - 1, 0))}
-        onNext={() => setPage((prev) => prev + 1)}
-      />
 
-      <OrderHistory/>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+        <div
+          className="
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            md:grid-cols-3
+            xl:grid-cols-4
+            gap-8
+            place-items-center
+          "
+        >          
+          {isLoading && (
+            <>
+              <RestaurantCardSkeleton />
+              <RestaurantCardSkeleton />
+              <RestaurantCardSkeleton />
+              <RestaurantCardSkeleton />
+            </>
+          )}
+
+          {error && (
+            <div className="col-span-full text-center py-8 text-red-500">
+              Error al cargar restaurantes
+            </div>
+          )}
+
+          {data &&
+            data.map((rest: RestaurantModel) => (
+              <RestaurantCard key={rest.id} {...rest} />
+            ))}
+        </div>
+
+        <div className="mt-10 flex justify-center">
+          <Pagination
+            page={page}
+            hasNext={!!data && data.length === size}
+            onPrev={() => setPage((prev) => Math.max(prev - 1, 0))}
+            onNext={() => setPage((prev) => prev + 1)}
+          />
+        </div>
+
+        <div className="mt-16">
+          <OrderHistory />
+        </div>
+      </div>
     </div>
   );
 }

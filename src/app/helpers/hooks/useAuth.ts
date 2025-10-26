@@ -1,3 +1,5 @@
+'use client'
+
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { authService, RegisterUserDto, LoginUserDto, LoginResponse } from "../../datasources";
 
