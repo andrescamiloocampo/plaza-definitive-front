@@ -1,7 +1,12 @@
-'use client'
+"use client";
 
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
-import { authService, RegisterUserDto, LoginUserDto, LoginResponse } from "../../datasources";
+import {
+  authService,
+  RegisterUserDto,
+  LoginUserDto,
+  LoginResponse,
+} from "../../datasources";
 
 export function useRegister(): UseMutationResult<void, Error, RegisterUserDto> {
   return useMutation({
@@ -18,9 +23,11 @@ export function useRegister(): UseMutationResult<void, Error, RegisterUserDto> {
 export function useLogin(): UseMutationResult<LoginResponse, Error, LoginUserDto> {
   return useMutation({
     mutationFn: (credentials: LoginUserDto) => authService.login(credentials),
-    onSuccess: (data: LoginResponse) => {      
-      sessionStorage.setItem("accessToken", data.token);
-      console.log("Login exitoso");
+    onSuccess: (data: LoginResponse) => {
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("accessToken", data.token);
+        console.log("Login exitoso");
+      }
     },
     onError: (error: Error) => {
       console.error("Error en el login:", error.message);
@@ -30,8 +37,10 @@ export function useLogin(): UseMutationResult<LoginResponse, Error, LoginUserDto
 
 export function useLogout() {
   return () => {
-    sessionStorage.removeItem("accessToken");
-    sessionStorage.removeItem("userEmail");
-    window.location.href = "/login";
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("userEmail");
+      window.location.href = "/login";
+    }
   };
 }

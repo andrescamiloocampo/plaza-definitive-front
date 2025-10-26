@@ -44,7 +44,6 @@ export class DishService {
   }
 
   async updateDish(id: number, data: DishPartialUpdate): Promise<void> {
-    console.log('Headers:',this.getHeaders())
     const res = await fetch(`${this.baseUrl}/${id}`, {
       method: "PUT",
       headers: this.getHeaders(),
@@ -62,6 +61,6 @@ export class DishService {
   }
 }
 
-export const dishService = new DishService(
-  sessionStorage.getItem("accessToken") ?? ""
-);
+export const dishService: DishService = typeof window !== "undefined"
+  ? new DishService(sessionStorage.getItem("accessToken") ?? "")
+  : null as any;
