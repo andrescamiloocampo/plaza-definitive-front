@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactElement, useState } from "react";
+import { ReactElement, useState, useEffect } from "react";
 import { DishModalBase } from "../DishModalBase/DishModalBase";
 import { Dish } from "@/app/models";
 
@@ -17,8 +17,15 @@ export const DishEditModal = ({
   onClose,
   onSave,
 }: DishEditModalProps): ReactElement | null => {
-  const [description, setDescription] = useState(dish?.description ?? "");
-  const [price, setPrice] = useState(dish?.price ?? 0);
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState(0);
+
+  useEffect(() => {
+    if (dish) {
+      setDescription(dish.description ?? "");
+      setPrice(dish.price ?? 0);
+    }
+  }, [dish]);
 
   if (!dish) return null;
 
@@ -32,34 +39,34 @@ export const DishEditModal = ({
     <DishModalBase title="Editar plato ✏️" isOpen={isOpen} onClose={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="space-y-5 bg-gradient-to-br from-blue-50 to-white rounded-2xl p-6 shadow-md border border-blue-100"
-      >        
+        className="space-y-6 bg-gradient-to-br from-blue-50 via-white to-green-50 rounded-2xl p-6 shadow-lg border border-blue-100 transition-all duration-300"
+      >
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
             Nombre del plato
           </label>
           <input
             type="text"
             value={dish.name}
             disabled
-            className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none cursor-not-allowed"
+            className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none cursor-not-allowed shadow-sm"
           />
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
             Descripción
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Escribe una descripción del plato"
-            className="w-full px-4 py-2 rounded-lg border border-blue-200 focus:border-blue-500 focus:ring focus:ring-blue-100 outline-none resize-none min-h-[80px]"
+            placeholder="Escribe una descripción del plato..."
+            className="w-full px-4 py-2 rounded-lg border border-blue-200 focus:border-blue-500 focus:ring focus:ring-blue-100 outline-none resize-none min-h-[90px] shadow-sm transition-all duration-200"
           />
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
             Precio ($)
           </label>
           <input
@@ -68,21 +75,21 @@ export const DishEditModal = ({
             step="0.01"
             value={price}
             onChange={(e) => setPrice(parseFloat(e.target.value))}
-            className="w-full px-4 py-2 rounded-lg border border-blue-200 focus:border-blue-500 focus:ring focus:ring-blue-100 outline-none"
+            className="w-full px-4 py-2 rounded-lg border border-blue-200 focus:border-green-500 focus:ring focus:ring-green-100 outline-none shadow-sm transition-all duration-200"
           />
         </div>
-        
-        <div className="flex justify-end space-x-3 pt-4">
+
+        <div className="flex justify-end space-x-3 pt-5">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition-all"
+            className="px-5 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 hover:shadow-sm transition-all duration-200"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
+            className="px-6 py-2 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
             Guardar cambios
           </button>

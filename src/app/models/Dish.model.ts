@@ -1,12 +1,17 @@
 export interface Dish {
   id: number;
   name: string;
-  category: string;
+  category: number;
   description: string;
   price: number;
   imageUrl: string;
   active: boolean;
   restaurantId: number;
+}
+
+export interface Category {
+  id: number;
+  name: string;
 }
 
 export interface DishRequest {

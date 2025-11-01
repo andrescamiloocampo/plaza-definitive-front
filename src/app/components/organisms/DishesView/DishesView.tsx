@@ -3,20 +3,39 @@
 import { ReactElement, useState } from "react";
 import { Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useDishes, useCreateDish, useUpdateDish, useToggleDishState } from "@/app/helpers/hooks/useDishes";
+import {
+  useDishes,
+  useCreateDish,
+  useUpdateDish,
+  useToggleDishState,
+  useDishesPaginated,
+} from "@/app/helpers/hooks/useDishes";
 import { DishCard } from "../../molecules/DishCard/DishCard";
 import { Dish } from "@/app/models";
 import { DishesViewModel } from "./DishesView.model";
 import { DishEditModal } from "../DishEditModal/DishEditModal";
 import { DishCreateModal } from "../DishCreateModal/DishCreateModal";
 import { toast } from "react-toastify";
+import { Pagination } from "../../molecules";
 
-export const DishesView = ({ selectedRestaurant }: DishesViewModel): ReactElement => {
+export const DishesView = ({
+  selectedRestaurant,
+}: DishesViewModel): ReactElement => {
   const { data: session } = useSession();
   const token = session?.accessToken as string;
-  
-  const { data, isLoading, isError } = useDishes(selectedRestaurant.id, token, 0, 10);
-  const dishes: Dish[] = Array.isArray(data) ? data : data?.content || [];
+
+  const [page, setPage] = useState(0);
+  const pageSize = 6;
+
+  const { data, isLoading, isError } = useDishesPaginated(
+    selectedRestaurant.id,
+    token,
+    page,
+    pageSize
+  );
+
+  const dishes: Dish[] = Array.isArray(data) ? data : data?.dishes || [];
+  const totalPages = data?.totalPages ?? 0;
 
   const createDishMutation = useCreateDish(selectedRestaurant.id);
   const updateDishMutation = useUpdateDish(selectedRestaurant.id);
@@ -25,26 +44,26 @@ export const DishesView = ({ selectedRestaurant }: DishesViewModel): ReactElemen
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
-  
+
   const handleCreateDish = () => setShowCreateModal(true);
 
   const handleEdit = (id: number) => {
-    const dish = dishes.find(d => d.id === id) || null;
+    const dish = dishes.find((d) => d.id === id) || null;
     setSelectedDish(dish);
     setShowEditModal(true);
   };
 
-  const handleCreate = async (dishData: Partial<Dish>) => {
+  const handleCreate = async (dishData: Partial<Dish>) => {    
     try {
       await createDishMutation.mutateAsync({
         id: 0,
         name: dishData.name!,
         description: dishData.description!,
         price: dishData.price!,
-        categoryId: 16,
+        categoryId: dishData.category ?? 0,
         imageUrl: dishData.imageUrl!,
-        active: true,  
-        restaurantId: selectedRestaurant.id
+        active: dishData.active ?? true,
+        restaurantId: selectedRestaurant.id,
       });
       toast.success("Plato creado correctamente");
       setShowCreateModal(false);
@@ -59,9 +78,9 @@ export const DishesView = ({ selectedRestaurant }: DishesViewModel): ReactElemen
     try {
       await updateDishMutation.mutateAsync({
         id: selectedDish.id,
-        data: {          
+        data: {
           description: dishData.description ?? selectedDish.description,
-          price: dishData.price ?? selectedDish.price,          
+          price: dishData.price ?? selectedDish.price,
         },
       });
       toast.success("Plato actualizado correctamente");
@@ -81,15 +100,27 @@ export const DishesView = ({ selectedRestaurant }: DishesViewModel): ReactElemen
         id,
         state: !dish.active,
       });
-      toast.success(`Plato ${dish.active ? "desactivado" : "activado"} correctamente`);
+      toast.success(
+        `Plato ${dish.active ? "desactivado" : "activado"} correctamente`
+      );
     } catch (error) {
       toast.error("Error al cambiar el estado del plato");
       console.error(error);
     }
   };
+  
+  const handleNextPage = () => {
+    if (page < totalPages - 1) setPage((prev) => prev + 1);
+  };
 
-  if (isLoading) return <p className="text-center text-gray-500">Cargando platos...</p>;
-  if (isError) return <p className="text-center text-red-500">Error al cargar platos.</p>;
+  const handlePrevPage = () => {
+    if (page > 0) setPage((prev) => prev - 1);
+  };
+
+  if (isLoading)
+    return <p className="text-center text-gray-500">Cargando platos...</p>;
+  if (isError)
+    return <p className="text-center text-red-500">Error al cargar platos.</p>;
 
   return (
     <div className="space-y-6">
@@ -109,7 +140,7 @@ export const DishesView = ({ selectedRestaurant }: DishesViewModel): ReactElemen
         <Plus className="w-5 h-5 mr-2" />
         Crear Nuevo Plato
       </button>
-
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {dishes.map((dish) => (
           <DishCard
@@ -120,7 +151,15 @@ export const DishesView = ({ selectedRestaurant }: DishesViewModel): ReactElemen
           />
         ))}
       </div>
-  
+      
+      
+        <Pagination
+          page={page}
+          hasNext={page < totalPages - 1}
+          onNext={handleNextPage}
+          onPrev={handlePrevPage}
+        />      
+      
       <DishCreateModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}

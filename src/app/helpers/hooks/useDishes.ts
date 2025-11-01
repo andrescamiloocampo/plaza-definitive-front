@@ -1,7 +1,10 @@
-'use client'
+"use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDishesByRestaurantId } from "@/app/datasources";
+import {
+  getDishesByRestaurantId,
+  getDishesByRestaurantIdPaginated,
+} from "@/app/datasources";
 import { DishRequest, DishPartialUpdate } from "@/app/models";
 import { dishService } from "@/app/datasources";
 
@@ -14,16 +17,33 @@ export const useDishes = (rid: number, token: string, page = 0, size = 10) => {
   });
 };
 
-export const useCreateDish = (rid: number) => {
+export const useDishesPaginated = (
+  rid: number,
+  token: string,
+  page = 0,
+  size = 10
+) => {
+  return useQuery({
+    queryKey: ["dishes-paginated", rid, page, size],
+    queryFn: () => getDishesByRestaurantIdPaginated(rid, page, size, token),
+    enabled: !!rid && !!token,
+    refetchOnWindowFocus: false,
+  });
+};
+
+
+export const useCreateDish = (restaurantId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (dish: DishRequest) => dishService.createDish(dish),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["dishes", rid] });
+    mutationFn: async (dishData: any) => {
+      return await dishService.createDish(dishData);
     },
-    onError: (error: any) => {
-      console.error("Error al crear el plato:", error);
+    onSuccess: () => {      
+      queryClient.invalidateQueries({
+        queryKey: ["dishes-paginated", restaurantId],
+        exact: false,
+      });
     },
   });
 };

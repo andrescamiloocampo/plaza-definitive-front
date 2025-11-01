@@ -18,10 +18,11 @@ export interface RoleResponseDto {
 }
 
 export interface UserResponseDto {
-  restaurantId: unknown;
+  restaurantId: number;
   id: number;
   name: string;
   lastname: string;
+  email: string;
   phone: string;
   birthdate: string;
   roles: RoleResponseDto[];
@@ -88,6 +89,28 @@ class UserService {
     }
 
     return response.json();
+  }
+
+  async createEmployee(userData: UserRequestDto, bussinessId: number): Promise<void> {
+    const body = {
+      ...userData,
+      password: "S3gur0_P@ss2025",
+    };
+
+    const response = await fetch(`${this.baseUrl}/user/EMPLOYEE?bid=${bussinessId}`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      if (response.status === 400) throw new Error("Datos inválidos");
+      if (response.status === 401) throw new Error("No autorizado");
+      if (response.status === 403)
+        throw new Error("No tienes permisos para crear empleados");
+      if (response.status === 409) throw new Error("El usuario ya existe");
+      throw new Error("Error al crear empleado");
+    }
   }
 }
 

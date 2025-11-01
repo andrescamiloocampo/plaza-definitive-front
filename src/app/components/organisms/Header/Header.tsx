@@ -31,7 +31,7 @@ export const Header = (): ReactElement => {
             <h1 className="text-base md:text-lg font-bold text-white leading-tight">
               Super Plaza!
             </h1>
-            <p className="text-xs text-white/80">Es hora de comer 🍕</p>
+            <p className="text-xs text-white/80">Es hora de comer</p>
           </div>
           <h1 className="text-base font-bold text-white sm:hidden">
             Super Plaza!

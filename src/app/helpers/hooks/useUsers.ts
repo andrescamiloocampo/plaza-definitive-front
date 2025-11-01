@@ -1,8 +1,8 @@
 'use client';
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery,useMutation } from "@tanstack/react-query";
 import { userService } from "@/app/datasources/users/userService";
-import { UserResponseDto } from "@/app/datasources/users/userService";
+import { UserResponseDto,UserRequestDto } from "@/app/datasources/users/userService";
 
 export const useUsers = (role: string) => {
   const {
@@ -18,3 +18,18 @@ export const useUsers = (role: string) => {
 
   return { users, isLoading, isError, error, refetch };
 };
+
+export const useCreateEmployee = () => {
+  return useMutation({
+    mutationFn: async ({
+      userData,
+      bussinessId,
+    }: {
+      userData: UserRequestDto;
+      bussinessId: number;
+    }) => {
+      await userService.createEmployee(userData, bussinessId);
+    },
+  });
+};
+

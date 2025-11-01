@@ -11,3 +11,6 @@ export { Header } from "./Header/Header";
 export { OrderCard } from "./OrderCard/OrderCard";
 export { RestaurantsView } from "./RestaurantsView/RestaurantsView";
 export { Welcome } from "./Welcome/Welcome";
+export { AssignRestaurantModal } from './AssignRestaurantModal/AssignRestaurantModal';
+export { EmployeeTable } from '../sections/EmployeeTable/EmployeeTable';
+export { CreateEmployeeModal } from './CreateEmployeeModal/CreateEmployeeModal';

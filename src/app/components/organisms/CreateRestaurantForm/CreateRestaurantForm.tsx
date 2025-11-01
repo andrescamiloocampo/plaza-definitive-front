@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { UtensilsCrossed } from "lucide-react";
 import { useCreateRestaurant } from "@/app/helpers/hooks/useRestaurants";
 import { RestaurantRequestModel } from "@/app/models";
+import { useUsers } from "@/app/helpers/hooks/useUsers";
 
 export const CreateRestaurantForm = () => {
   const [form, setForm] = useState<RestaurantRequestModel>({
@@ -16,13 +17,14 @@ export const CreateRestaurantForm = () => {
     ownerId: 0,
   });
 
+  const {users:owners,isLoading,error} = useUsers('OWNER');
   const { createRestaurant, isPending } = useCreateRestaurant();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm({
       ...form,
-      [name]: name === "ownerId" ? parseInt(value, 10) || 0 : value,
+      [name]: name === "ownerId" ? parseInt(value as string, 10) || 0 : value,
     });
   };
 
@@ -46,7 +48,7 @@ export const CreateRestaurantForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">      
+    <form onSubmit={handleSubmit} className="space-y-6">           
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -126,19 +128,32 @@ export const CreateRestaurantForm = () => {
         />
       </div>
       
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          ID del Propietario
-        </label>
-        <input
-          type="number"
-          name="ownerId"
-          placeholder="7"
-          value={form.ownerId}
-          onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-        />
-      </div>
+     <div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Propietario <span className="text-red-500">*</span>
+  </label>
+
+  {isLoading ? (
+    <p className="text-gray-500">Cargando propietarios...</p>
+  ) : error ? (
+    <p className="text-red-500">Error al cargar los propietarios</p>
+  ) : (
+    <select
+      name="ownerId"
+      value={form.ownerId || ""}
+      onChange={handleChange}
+      required
+      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
+    >
+      <option value="">Seleccione un propietario</option>
+      {owners?.map((owner) => (
+        <option key={owner.id} value={owner.id}>
+          {owner.name} {owner.lastname} - {owner.email}
+        </option>
+      ))}
+    </select>
+  )}
+</div>
     
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 flex items-start space-x-3">
         <UtensilsCrossed className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />

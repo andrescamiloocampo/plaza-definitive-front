@@ -10,9 +10,9 @@ interface DishCreateModalProps {
   onCreate: (data: any) => void;
 }
 
-export const DishCreateModal = ({ isOpen, onClose, onCreate }: DishCreateModalProps): ReactElement | null => {
+export const DishCreateModal = ({ isOpen, onClose, onCreate }: DishCreateModalProps): ReactElement | null => {  
   return (
-    <DishModalBase title="Crear nuevo plato 🍽️" isOpen={isOpen} onClose={onClose}>
+    <DishModalBase title="Crear nuevo plato" isOpen={isOpen} onClose={onClose}>
       <DishForm
         onSubmit={(data) => {
           onCreate(data);

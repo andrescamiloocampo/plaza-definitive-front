@@ -3,7 +3,7 @@
 import { useQuery,useMutation } from "@tanstack/react-query";
 
 import { restaurantService } from "@/app/datasources";
-import { RestaurantRequestModel, RestaurantResponseModel } from "@/app/models";
+import { RestaurantEmployeeModel, RestaurantRequestModel, RestaurantResponseModel } from "@/app/models";
 
 export const useRestaurantsByOwner = (ownerId: number) => {
   const {
@@ -44,5 +44,26 @@ export const useCreateRestaurant = () => {
     isError,
     error,
     isSuccess,
+  };
+};
+
+export const useGetEmployees = () => {
+  const {
+    data: assignments,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["employeesAssignments"],
+    queryFn: async () => await restaurantService.getEmployees(),
+  });
+
+  return {
+    assignments: assignments || [],
+    isLoading,
+    isError,
+    error,
+    refetch,
   };
 };

@@ -1,13 +1,15 @@
-import { RestaurantRequestModel, RestaurantResponseModel } from "@/app/models";
+import { RestaurantEmployeeModel, RestaurantRequestModel, RestaurantResponseModel } from "@/app/models";
 
 const RESTAURANTS_BASE_URL =
   process.env.NEXT_PUBLIC_PLAZA_HOST || "http://localhost:8082/api/v1";
 
 class RestaurantService {
   private baseUrl: string;
+  private employeesUrl: string;
 
   constructor() {
     this.baseUrl = `${RESTAURANTS_BASE_URL}/restaurants`;
+    this.employeesUrl = `${RESTAURANTS_BASE_URL}/employees`
   }
 
   private getAuthToken(): string {
@@ -76,11 +78,27 @@ class RestaurantService {
     userId: number;
     restaurantId: number;
     active: boolean;
-  }): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/employees`, {
+  }): Promise<void> {    
+    const response = await fetch(`${this.employeesUrl}`, {
       method: "POST",
       headers: this.getHeaders(),
       body: JSON.stringify(data),
+    });
+    
+
+    if (!response.ok) {
+      if (response.status === 400) throw new Error("Solicitud inválida");
+      if (response.status === 401) throw new Error("No autorizado");
+      if (response.status === 403)
+        throw new Error("No tienes permisos para asignar empleados");
+      throw new Error("Error al asignar empleado");
+    }
+  }
+
+  async getEmployees():Promise<RestaurantEmployeeModel> {
+    const response = await fetch(`${this.employeesUrl}`,{
+      method: "GET",
+      headers: this.getHeaders()      
     });
 
     if (!response.ok) {
@@ -90,6 +108,7 @@ class RestaurantService {
         throw new Error("No tienes permisos para asignar empleados");
       throw new Error("Error al asignar empleado");
     }
+    return await response.json();
   }
 }
 
